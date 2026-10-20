@@ -247,41 +247,44 @@
         .replace(/ฯลฯ/g, 'และอื่น ๆ').replace(/\s*–\s*/g, ' ถึง ').replace(/(\S)\/(\S)/g, '$1 หรือ $2')
         .replace(/[“”"()]/g, ' ');
     },
-    ttsChunks(html, max, merge) {
+    /* แบ่งข้อความเป็น "ประโยค" สำหรับอ่านทีละประโยค และเติมเครื่องหมายให้เสียงหยุดหายใจ
+     * ภาษาไทยไม่ใช้ , และ . แต่เว้นวรรคระหว่างวลี → แปลงช่องว่างระหว่างอักษรไทยเป็น ","
+     * และปิดท้ายทุกประโยค/รายการด้วย "." เพื่อให้เสียงลงจังหวะเป็นธรรมชาติ */
+    ttsChunks(html, max) {
       max = max || 220;
-      // ขึ้นบรรทัดใหม่ทุกครั้งที่จบย่อหน้า/รายการ/หัวข้อ → ใช้เป็นจุดหยุดหายใจ
       const text = String(html || '')
         .replace(/<\/(p|li|h\d|div)>|<br\s*\/?>/gi, '\n')
         .replace(/<[^>]+>/g, ' ')
         .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
       const out = [];
       let lastShort = false;
+      const end = (t) => (/[.!?]$/.test(t) ? t : t + '.');
       this.ttsNormalize(text).split(/\n|\s[—·•]\s|\s\.\s/).forEach((line) => {
-        line = line.replace(/\s+/g, ' ').trim();
+        line = line.replace(/\s+/g, ' ').trim().replace(/[,.]+$/, '');
         if (!line) return;
-        // รายการสั้น ๆ ต่อกัน (เช่น พระ / นาง / ยักษ์ / ลิง) รวมอ่านในประโยคเดียว ไม่ให้หยุดทีละคำ
+        // ใส่ "," เฉพาะเมื่อวลีก่อนหน้ายาวพอ (≥ 12 ตัว) กันการหยุดถี่เกินไป เช่น "เมื่อปี พุทธศักราช"
+        line = line.split(' ').reduce((acc, w) => {
+          if (!acc) return w;
+          const prev = acc.slice(acc.lastIndexOf(', ') + 1);
+          const thai = /[฀-๿]$/.test(acc) && /^[฀-๿]/.test(w);
+          return acc + (thai && prev.trim().length >= 12 && w.length >= 3 ? ', ' : ' ') + w;
+        }, '');
+        // รายการสั้น ๆ ต่อกัน (เช่น พระ นาง ยักษ์ ลิง) อ่านเป็นประโยคเดียวคั่นด้วย ","
         if (line.length < 30 && lastShort && out.length && out[out.length - 1].length + line.length < max) {
-          out[out.length - 1] += ' ' + line; return;
+          out[out.length - 1] = out[out.length - 1].replace(/\.$/, ', ') + end(line); return;
         }
         lastShort = line.length < 30;
-        if (line.length <= max) { out.push(line); return; }
-        // ประโยคยาว: แบ่งตรงช่องว่าง (ภาษาไทยเว้นวรรคระหว่างวลี) ให้แต่ละท่อนยาวใกล้เคียงกัน
-        const parts = Math.ceil(line.length / max);
-        const target = line.length / parts;
+        if (line.length <= max) { out.push(end(line)); return; }
+        // ประโยคยาวมาก: แบ่งที่ "," ให้แต่ละท่อนยาวใกล้เคียงกัน
+        const target = line.length / Math.ceil(line.length / max);
         let cur = '';
-        line.split(' ').forEach((w) => {
-          if (cur && cur.length + w.length + 1 > target) { out.push(cur); cur = w; }
-          else cur = cur ? cur + ' ' + w : w;
+        line.split(', ').forEach((w) => {
+          if (cur && cur.length + w.length + 2 > target) { out.push(end(cur)); cur = w; }
+          else cur = cur ? cur + ', ' + w : w;
         });
-        if (cur) out.push(cur);
+        if (cur) out.push(end(cur));
       });
-      // merge: รวมประโยคติดกันเป็นท่อนยาว (ใช้กับเสียงที่ติดตั้งในเครื่อง ลดช่วงเงียบระหว่างท่อน)
-      if (!merge) return out;
-      return out.reduce((acc, line) => {
-        if (acc.length && acc[acc.length - 1].length + line.length + 1 <= max) acc[acc.length - 1] += ' ' + line;
-        else acc.push(line);
-        return acc;
-      }, []);
+      return out;
     },
     speak(text, onEnd) {
       if (!('speechSynthesis' in window)) { this.ui.toast('เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียง', 'warn'); return; }
@@ -289,9 +292,9 @@
       speechSynthesis.cancel();
       const voice = this.thaiVoice();
       if (!voice && speechSynthesis.getVoices().length) this.ui.toast('ไม่พบเสียงภาษาไทยในเครื่อง อาจอ่านไม่ชัด', 'warn');
-      // เสียงออนไลน์ (Natural/Google) ต้องส่งท่อนสั้นกันสะดุด ส่วนเสียงในเครื่องอ่านท่อนยาวได้ลื่นกว่า
-      const chunks = voice && voice.localService ? this.ttsChunks(text, 600, true) : this.ttsChunks(text);
+      const chunks = this.ttsChunks(text);
       const rate = store.get('ttsRate', 1);
+      const PAUSE_MS = 280;
       let i = 0;
       const finish = () => { if (run !== this._ttsRun) return; this.speaking = false; if (onEnd) onEnd(); };
       const next = () => {
@@ -301,7 +304,7 @@
         u.lang = 'th-TH';
         u.rate = rate;
         if (voice) u.voice = voice;
-        u.onend = next;
+        u.onend = () => setTimeout(next, PAUSE_MS);   // หยุดหายใจระหว่างประโยค
         u.onerror = (e) => { if (e.error !== 'interrupted' && e.error !== 'canceled') next(); };
         speechSynthesis.speak(u);
       };

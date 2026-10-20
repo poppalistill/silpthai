@@ -1,6 +1,6 @@
 /* sw.js — ทำให้แอปใช้งานแบบออฟไลน์ได้ (PWA)
  * เมื่อเพิ่มไฟล์ใหม่ ให้เพิ่มชื่อไฟล์ใน FILES และเปลี่ยนเลข CACHE */
-const CACHE = 'silpthai-v6';
+const CACHE = 'silpthai-v7';
 const FILES = [
   './', 'index.html', 'manifest.json', 'css/style.css', 'assets/icon.svg',
   'js/config.js', 'js/core.js', 'js/app.js',
