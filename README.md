@@ -21,7 +21,9 @@ python -m http.server 5500
 ```
 แล้วเปิด http://localhost:5500 — หรือใช้ส่วนขยาย **Live Server** ใน VS Code (คลิกขวา index.html → Open with Live Server)
 
-**ใช้งานจริงบนอินเทอร์เน็ต:** เปิด GitHub Pages (ดูหัวข้อด้านล่าง) จะได้ลิงก์ `https://<ชื่อผู้ใช้>.github.io/<ชื่อ repo>/` ส่งให้อาจารย์และเปิดบนมือถือได้
+**ใช้งานจริงบนอินเทอร์เน็ต:** เปิด GitHub Pages (ดูหัวข้อด้านล่าง) จะได้ลิงก์ **https://poppalistill.github.io/silpthai/** ส่งให้อาจารย์และเปิดบนมือถือได้
+
+📦 Repository: https://github.com/poppalistill/silpthai
 
 ### รหัสบทบาทสำหรับสาธิต
 | บทบาท | รหัส |
@@ -86,9 +88,9 @@ ThaiCultureApp/
 
 ### หัวหน้ากลุ่ม (ทำครั้งเดียว)
 1. สมัคร/เข้าสู่ระบบ https://github.com → กด **New repository** ตั้งชื่อ เช่น `silpthai` → เลือก **Public** → Create (ไม่ต้องติ๊ก README)
-2. ในโฟลเดอร์โปรเจกต์ รันคำสั่ง (เปลี่ยน `<USER>` เป็นชื่อบัญชี GitHub):
+2. ในโฟลเดอร์โปรเจกต์ รันคำสั่ง (ทำไปแล้ว):
    ```bash
-   git remote add origin https://github.com/<USER>/silpthai.git
+   git remote add origin https://github.com/poppalistill/silpthai.git
    git push -u origin main
    ```
 3. เชิญเพื่อน: repo → **Settings → Collaborators → Add people** → ใส่ชื่อบัญชี GitHub ของเพื่อน
@@ -98,7 +100,7 @@ ThaiCultureApp/
 1. ติดตั้ง [Git](https://git-scm.com) และ [VS Code](https://code.visualstudio.com) (หรือใช้ [GitHub Desktop](https://desktop.github.com) แบบไม่ต้องพิมพ์คำสั่ง)
 2. รับคำเชิญทางอีเมล แล้วดาวน์โหลดโปรเจกต์:
    ```bash
-   git clone https://github.com/<USER>/silpthai.git
+   git clone https://github.com/poppalistill/silpthai.git
    ```
 3. **ทุกครั้งก่อนเริ่มแก้** ดึงงานล่าสุดของเพื่อน:
    ```bash
