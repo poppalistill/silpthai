@@ -247,7 +247,7 @@
         .replace(/ฯลฯ/g, 'และอื่น ๆ').replace(/\s*–\s*/g, ' ถึง ').replace(/(\S)\/(\S)/g, '$1 หรือ $2')
         .replace(/[“”"()]/g, ' ');
     },
-    ttsChunks(html, max) {
+    ttsChunks(html, max, merge) {
       max = max || 220;
       // ขึ้นบรรทัดใหม่ทุกครั้งที่จบย่อหน้า/รายการ/หัวข้อ → ใช้เป็นจุดหยุดหายใจ
       const text = String(html || '')
@@ -275,7 +275,13 @@
         });
         if (cur) out.push(cur);
       });
-      return out;
+      // merge: รวมประโยคติดกันเป็นท่อนยาว (ใช้กับเสียงที่ติดตั้งในเครื่อง ลดช่วงเงียบระหว่างท่อน)
+      if (!merge) return out;
+      return out.reduce((acc, line) => {
+        if (acc.length && acc[acc.length - 1].length + line.length + 1 <= max) acc[acc.length - 1] += ' ' + line;
+        else acc.push(line);
+        return acc;
+      }, []);
     },
     speak(text, onEnd) {
       if (!('speechSynthesis' in window)) { this.ui.toast('เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียง', 'warn'); return; }
@@ -283,7 +289,8 @@
       speechSynthesis.cancel();
       const voice = this.thaiVoice();
       if (!voice && speechSynthesis.getVoices().length) this.ui.toast('ไม่พบเสียงภาษาไทยในเครื่อง อาจอ่านไม่ชัด', 'warn');
-      const chunks = this.ttsChunks(text);
+      // เสียงออนไลน์ (Natural/Google) ต้องส่งท่อนสั้นกันสะดุด ส่วนเสียงในเครื่องอ่านท่อนยาวได้ลื่นกว่า
+      const chunks = voice && voice.localService ? this.ttsChunks(text, 600, true) : this.ttsChunks(text);
       const rate = store.get('ttsRate', 1);
       let i = 0;
       const finish = () => { if (run !== this._ttsRun) return; this.speaking = false; if (onEnd) onEnd(); };
