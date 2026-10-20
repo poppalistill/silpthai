@@ -311,7 +311,8 @@
     /* หัวเรื่องของแต่ละหน้า: "หมวด ๐๕ · คลังความรู้" + ชื่อ + คำอธิบาย + ลายประจำยาม */
     pageHead(m, extra) {
       const no = m.no ? `หมวด ${toThaiDigits(String(m.no).padStart(2, '0'))} · ` : '';
-      return `<header class="page-head">
+      return `<header class="page-head" style="--c:${m.color || 'var(--red)'}">
+        ${m.no ? `<span class="big-no" aria-hidden="true">${toThaiDigits(String(m.no).padStart(2, '0'))}</span>` : ''}
         <div class="kicker">${no}${GROUP_LABELS[m.group] || ''}</div>
         <h1>${m.title}</h1>
         ${m.desc ? `<p class="lede">${m.desc}</p>` : ''}
@@ -322,7 +323,7 @@
 
     /* แถวรายการแบบสารบัญหนังสือ (i = ลำดับ ถ้ามี) */
     card(it, m, i) {
-      return `<button class="card" data-id="${esc(it.id)}">
+      return `<button class="card" data-id="${esc(it.id)}" style="--c:${it.color || m.color || 'var(--red)'}">
         ${i != null ? `<span class="card-no">${toThaiDigits(String(i + 1).padStart(2, '0'))}</span>` : ''}
         <span class="card-body">
           ${it.cat ? `<span class="card-cat">${it.cat}</span>` : ''}
@@ -373,16 +374,17 @@
       if (!it) return;
       const key = m.id + ':' + it.id;
       const html = `
-        <article class="sheet">
+        <header class="sheet-head" style="--c:${it.color || m.color || 'var(--red)'}">
           <div class="kicker">${m.title}${it.cat ? ' · ' + it.cat : ''}</div>
           <h2>${it.title}</h2>
           ${it.sub ? `<p class="lede">${it.sub}</p>` : ''}
+        </header>
+        <article class="sheet-body">
           <div class="detail-actions">
             <button class="btn sm fav-btn">${favLabel(key)}</button>
             <button class="btn sm tts-btn">ฟังเสียงอ่าน</button>
             <button class="btn sm share-btn">แชร์ลิงก์</button>
           </div>
-          <div class="ornament"><i></i></div>
           <div class="detail-body prose">${it.body || ''}</div>
           ${it.tags && it.tags.length ? `<div class="tags">คำค้น: ${it.tags.join(', ')}</div>` : ''}
         </article>`;

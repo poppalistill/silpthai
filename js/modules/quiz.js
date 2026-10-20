@@ -39,7 +39,7 @@
     short: 'แบบทดสอบ',
     icon: '🏆',
     group: 'play',
-    color: '#c99a2e',
+    color: '#8a5a12',
     desc: `สุ่ม ${N} ข้อ ข้อละ ${SEC} วินาที สะสมคะแนนและติดอันดับ`,
     results() { return App.store.get('quizResults', []); },
     render(el) {

@@ -6,7 +6,7 @@ App.register({
   short: 'ตั้งค่า',
   icon: '⚙️',
   group: 'account',
-  color: '#5a5a5a',
+  color: '#4a4550',
   desc: 'โหมดมืด ขนาดตัวอักษร เสียงอ่าน และติดตั้งแอปบนมือถือ',
   render(el) {
     const st = App.store;
