@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ศิลป์ไทย · SilpThai</title>
+  <meta name="description" content="แอปพลิเคชันเรียนรู้และสืบสานศิลปวัฒนธรรมไทย">
+  <meta name="theme-color" content="#7a1f1f">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <button id="menuBtn" class="icon-btn only-mobile" aria-label="เมนู">☰</button>
+    <a class="brand" href="#/home">
+      <img src="assets/icon.svg" alt="" width="38" height="38">
+      <span><b id="brandName">ศิลป์ไทย</b><small id="brandTag"></small></span>
+    </a>
+    <form id="quickSearch" class="quick-search only-desktop" role="search">
+      <input id="quickSearchIn" class="input" type="search" placeholder="🔍 ค้นหา เช่น โขน, ลอยกระทง, ต้มยำ...">
+    </form>
+    <button id="userChip" class="user-chip" aria-label="บัญชีผู้ใช้"></button>
+  </header>
+
+  <div class="layout">
+    <nav id="sidenav" class="sidenav" aria-label="เมนูบริการ"></nav>
+    <div id="scrim" class="scrim"></div>
+    <main id="main" class="main"></main>
+  </div>
+
+  <nav id="bottomnav" class="bottomnav only-mobile" aria-label="เมนูลัด"></nav>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <!-- 1) ตั้งค่า + แกนกลาง -->
+  <script src="js/config.js"></script>
+  <script src="js/core.js"></script>
+
+  <!-- 2) บริการต่าง ๆ (1 ไฟล์ = 1 บริการ) — เพิ่มบริการใหม่ให้เพิ่มบรรทัดที่นี่ -->
+  <script src="js/modules/home.js"></script>
+  <script src="js/modules/search.js"></script>
+  <script src="js/modules/chatbot.js"></script>
+  <script src="js/modules/arts.js"></script>
+  <script src="js/modules/dance.js"></script>
+  <script src="js/modules/music.js"></script>
+  <script src="js/modules/festivals.js"></script>
+  <script src="js/modules/regions.js"></script>
+  <script src="js/modules/food.js"></script>
+  <script src="js/modules/costume.js"></script>
+  <script src="js/modules/literature.js"></script>
+  <script src="js/modules/idioms.js"></script>
+  <script src="js/modules/etiquette.js"></script>
+  <script src="js/modules/crafts.js"></script>
+  <script src="js/modules/writing.js"></script>
+  <script src="js/modules/coloring.js"></script>
+  <script src="js/modules/quiz.js"></script>
+  <script src="js/modules/events.js"></script>
+  <script src="js/modules/favorites.js"></script>
+  <script src="js/modules/profile.js"></script>
+  <script src="js/modules/settings.js"></script>
+  <script src="js/modules/admin.js"></script>
+  <script src="js/modules/about.js"></script>
+
+  <!-- 3) เริ่มแอป (ต้องอยู่ท้ายสุด) -->
+  <script src="js/app.js"></script>
+</body>
+</html>
