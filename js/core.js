@@ -218,21 +218,57 @@
     },
 
     /* ---------- อ่านออกเสียง (Text-to-Speech) ---------- */
+    /* อ่านทีละท่อนสั้น ๆ (ไม่เกิน ~160 ตัวอักษร) เพราะเสียงภาษาไทยของเบราว์เซอร์
+     * มักกระตุก/ขาดหายเมื่อส่งข้อความยาวทีเดียว และเลือกเสียงที่ติดตั้งในเครื่องก่อนเสียงออนไลน์ */
     speaking: false,
+    _ttsRun: 0,
+    thaiVoice() {
+      const th = speechSynthesis.getVoices().filter((v) => v.lang && v.lang.toLowerCase().replace('_', '-').startsWith('th'));
+      return th.find((v) => v.localService) || th[0] || null;
+    },
+    ttsChunks(text, max) {
+      max = max || 160;
+      const words = strip(text).replace(/\s*\.\s*/g, ' ').split(/\s+/).filter(Boolean);
+      const out = [];
+      let cur = '';
+      words.forEach((w) => {
+        if (cur && (cur + ' ' + w).length > max) { out.push(cur); cur = w; }
+        else cur = cur ? cur + ' ' + w : w;
+        // คำเดียวที่ยาวมาก (ภาษาไทยไม่เว้นวรรค) ตัดตามความยาว
+        while (cur.length > max) { out.push(cur.slice(0, max)); cur = cur.slice(max); }
+      });
+      if (cur) out.push(cur);
+      return out;
+    },
     speak(text, onEnd) {
       if (!('speechSynthesis' in window)) { this.ui.toast('เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียง', 'warn'); return; }
+      const run = ++this._ttsRun;
       speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(strip(text).slice(0, 3000));
-      u.lang = 'th-TH';
-      u.rate = store.get('ttsRate', 1);
-      const voice = speechSynthesis.getVoices().find((v) => v.lang && v.lang.toLowerCase().startsWith('th'));
-      if (voice) u.voice = voice;
-      else if (speechSynthesis.getVoices().length) this.ui.toast('ไม่พบเสียงภาษาไทยในเครื่อง อาจอ่านไม่ชัด', 'warn');
-      u.onend = u.onerror = () => { this.speaking = false; if (onEnd) onEnd(); };
+      const voice = this.thaiVoice();
+      if (!voice && speechSynthesis.getVoices().length) this.ui.toast('ไม่พบเสียงภาษาไทยในเครื่อง อาจอ่านไม่ชัด', 'warn');
+      const chunks = this.ttsChunks(text);
+      const rate = store.get('ttsRate', 1);
+      let i = 0;
+      const finish = () => { if (run !== this._ttsRun) return; this.speaking = false; if (onEnd) onEnd(); };
+      const next = () => {
+        if (run !== this._ttsRun) return;           // ถูกหยุดหรือเริ่มอ่านเรื่องใหม่แล้ว
+        if (i >= chunks.length) { finish(); return; }
+        const u = new SpeechSynthesisUtterance(chunks[i++]);
+        u.lang = 'th-TH';
+        u.rate = rate;
+        if (voice) u.voice = voice;
+        u.onend = next;
+        u.onerror = (e) => { if (e.error !== 'interrupted' && e.error !== 'canceled') next(); };
+        speechSynthesis.speak(u);
+      };
       this.speaking = true;
-      speechSynthesis.speak(u);
+      setTimeout(next, 120); // เว้นจังหวะหลัง cancel() ป้องกันเสียงสะดุดใน Chrome
     },
-    stopSpeak() { if ('speechSynthesis' in window) speechSynthesis.cancel(); this.speaking = false; },
+    stopSpeak() {
+      this._ttsRun++;
+      if ('speechSynthesis' in window) speechSynthesis.cancel();
+      this.speaking = false;
+    },
 
     /* ---------- ค้นหาข้อมูลรวมจากทุกบริการ ---------- */
     allItems() {
