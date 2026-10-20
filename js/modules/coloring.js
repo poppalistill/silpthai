@@ -65,11 +65,11 @@
             <h3>จานสีไทย</h3>
             <div class="palette">${PALETTE.map(([c, n], i) => `<button class="swatch ${i === 0 ? 'on' : ''} ${['#ffffff', '#f4e3c1', '#f7c6d0'].includes(c) ? 'light' : ''}" data-c="${c}" style="background:${c}" title="${n}">${n}</button>`).join('')}</div>
             <div class="btn-row" style="margin-top:14px">
-              <button class="btn sm" id="cRandom">🎲 สุ่มสี</button>
-              <button class="btn sm" id="cReset">🧽 เริ่มใหม่</button>
-              <button class="btn sm primary" id="cSave">💾 บันทึกภาพ</button>
+              <button class="btn sm" id="cRandom">สุ่มสี</button>
+              <button class="btn sm" id="cReset">เริ่มใหม่</button>
+              <button class="btn sm primary" id="cSave">บันทึกภาพ</button>
             </div>
-            <h3 style="margin-top:16px">🖼️ แกลเลอรีของฉัน</h3>
+            <h3 style="margin-top:16px">แกลเลอรีของฉัน</h3>
             <div class="gallery" id="gallery"></div>
           </div>
         </div>`;

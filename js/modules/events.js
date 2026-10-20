@@ -43,33 +43,32 @@
         const mine = u ? bookings().filter((b) => b.userId === u.id) : [];
         el.innerHTML = App.ui.pageHead(m) + `
           <div class="chips" style="margin-bottom:14px">
-            <button class="chip ${tab === 'all' ? 'on' : ''}" data-t="all">📋 กิจกรรมทั้งหมด (${list.length})</button>
-            <button class="chip ${tab === 'mine' ? 'on' : ''}" data-t="mine">🎫 การจองของฉัน (${mine.length})</button>
-            ${App.role() === 'admin' ? '<a class="chip" href="#/admin">🛡️ จัดการกิจกรรม</a>' : ''}
+            <button class="chip ${tab === 'all' ? 'on' : ''}" data-t="all">กิจกรรมทั้งหมด (${list.length})</button>
+            <button class="chip ${tab === 'mine' ? 'on' : ''}" data-t="mine">การจองของฉัน (${mine.length})</button>
+            ${App.role() === 'admin' ? '<a class="chip" href="#/admin">จัดการกิจกรรม</a>' : ''}
           </div>
           ${tab === 'all' ? `<div class="grid cols-3">${list.map((e) => {
             const left = e.capacity - taken(e.id);
             const past = isPast(e);
             return `<div class="panel event-card">
-              <div style="font-size:2.4rem">${e.emoji || '🎉'}</div>
               <span class="chip sm">${App.esc(e.cat || 'กิจกรรม')}</span>
               <h3 style="margin:0">${App.esc(e.title)}</h3>
-              <div class="when">📅 ${App.thaiDate(e.date)} · ⏰ ${App.esc(e.time)}</div>
-              <div>📍 ${App.esc(e.place)}</div>
-              <div>💰 ${+e.price ? e.price + ' บาท/คน' : 'ฟรี'}</div>
+              <div class="when">${App.thaiDate(e.date)} · ${App.esc(e.time)}</div>
+              <div>${App.esc(e.place)}</div>
+              <div>${+e.price ? e.price + ' บาท/คน' : 'ฟรี'}</div>
               <p class="muted" style="margin:0">${App.esc(e.desc)}</p>
               <div class="progress"><i style="width:${Math.min(100, (1 - left / e.capacity) * 100)}%"></i></div>
               <div class="seat">เหลือ ${Math.max(0, left)} / ${e.capacity} ที่นั่ง</div>
               <button class="btn ${left > 0 && !past ? 'primary' : ''}" data-book="${e.id}" ${left <= 0 || past ? 'disabled' : ''}>
-                ${past ? 'สิ้นสุดแล้ว' : left <= 0 ? 'เต็มแล้ว' : '🎟️ จองเลย'}</button>
+                ${past ? 'สิ้นสุดแล้ว' : left <= 0 ? 'เต็มแล้ว' : 'จองเลย'}</button>
             </div>`;
           }).join('')}</div>`
-          : !u ? '<div class="locked"><div class="big">🔐</div><p>เข้าสู่ระบบเพื่อดูการจองของคุณ</p><a class="btn primary" href="#/profile">เข้าสู่ระบบ</a></div>'
+          : !u ? '<div class="locked"><p>เข้าสู่ระบบเพื่อดูการจองของคุณ</p><a class="btn primary" href="#/profile">เข้าสู่ระบบ</a></div>'
           : mine.length ? `<div class="grid cols-2">${mine.map((b) => {
             const e = list.find((x) => x.id === b.eventId) || { title: '(กิจกรรมถูกลบแล้ว)', date: '', time: '', place: '' };
             return `<div class="panel" style="border-left:6px solid var(--gold)">
               <small class="muted">รหัสการจอง</small><h3 style="margin:0;letter-spacing:.08em">${b.code}</h3>
-              <p style="margin:6px 0"><b>${App.esc(e.title)}</b><br>📅 ${e.date ? App.thaiDate(e.date) : '-'} ${App.esc(e.time)}<br>📍 ${App.esc(e.place)}</p>
+              <p style="margin:6px 0"><b>${App.esc(e.title)}</b><br>${e.date ? App.thaiDate(e.date) : '-'} ${App.esc(e.time)}<br>${App.esc(e.place)}</p>
               <p class="muted" style="margin:0">ผู้จอง: ${App.esc(b.name)} · ${b.qty} ที่นั่ง · โทร ${App.esc(b.phone)}</p>
               <div class="btn-row" style="margin-top:10px"><button class="btn sm danger" data-cancel="${b.id}">ยกเลิกการจอง</button></div>
             </div>`;
@@ -89,8 +88,8 @@
         const u = App.user();
         const left = e.capacity - taken(e.id);
         const w = App.ui.modal(`<div class="modal-pad">
-          <h2>🎟️ จอง: ${App.esc(e.title)}</h2>
-          <p class="muted">📅 ${App.thaiDate(e.date)} ${App.esc(e.time)} · 📍 ${App.esc(e.place)} · เหลือ ${left} ที่นั่ง</p>
+          <h2>จอง: ${App.esc(e.title)}</h2>
+          <p class="muted">${App.thaiDate(e.date)} ${App.esc(e.time)} · ${App.esc(e.place)} · เหลือ ${left} ที่นั่ง</p>
           <form id="bkForm">
             <label class="field"><span>ชื่อ-นามสกุลผู้จอง *</span><input class="input" name="name" required value="${App.esc(u.name)}"></label>
             <label class="field"><span>เบอร์โทรศัพท์ * (10 หลัก)</span><input class="input" name="phone" required pattern="0[0-9]{9}" inputmode="numeric" placeholder="08xxxxxxxx"></label>
@@ -111,7 +110,7 @@
           App.bump('bookings');
           App.addPoints(10, 'ร่วมสืบสานวัฒนธรรม');
           App.ui.modal(`<div class="modal-pad" style="text-align:center">
-            <div style="font-size:4rem">🎉</div><h2>จองสำเร็จ!</h2>
+            <div style="font-size:4rem"></div><h2>จองสำเร็จ!</h2>
             <p>รหัสการจองของคุณ</p><h1 style="letter-spacing:.12em;color:var(--red)">${b.code}</h1>
             <p class="muted">${App.esc(e.title)}<br>${App.thaiDate(e.date)} ${App.esc(e.time)}</p>
             <p class="muted" style="font-size:.85rem">แสดงรหัสนี้ที่จุดลงทะเบียนหน้างาน</p></div>`, { onClose: () => { tab = 'mine'; draw(); } });

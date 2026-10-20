@@ -47,10 +47,10 @@
   REGIONS.forEach((r) => {
     r.tags = ['ภาค', r.title];
     r.body = `<p>${r.sub}</p><p class="muted">จังหวัดตัวอย่าง: ${r.provinces}</p>` +
-      section('🍲', 'อาหารขึ้นชื่อ', r.food) + section('💃', 'การแสดง', r.show) + section('🎶', 'ดนตรี', r.music) +
-      section('📅', 'ประเพณี', r.fest) + section('🧶', 'หัตถกรรม', r.craft) +
-      `<h4>🗣️ ภาษาถิ่นน่ารู้</h4>` +
-      r.phrases.map(([th, mean], i) => `<div class="phrase"><span><b>${th}</b> — ${mean}</span><button class="btn sm say" data-say="${th}">🔊</button></div>`).join('');
+      section('', 'อาหารขึ้นชื่อ', r.food) + section('', 'การแสดง', r.show) + section('', 'ดนตรี', r.music) +
+      section('', 'ประเพณี', r.fest) + section('', 'หัตถกรรม', r.craft) +
+      `<h4>ภาษาถิ่นน่ารู้</h4>` +
+      r.phrases.map(([th, mean], i) => `<div class="phrase"><span><b>${th}</b> — ${mean}</span><button class="btn sm say" data-say="${th}">ฟังเสียง</button></div>`).join('');
   });
 
   App.register({
@@ -66,12 +66,12 @@
       const m = this;
       el.innerHTML = App.ui.pageHead(m) + `
         <p class="muted">เลือกภาคเพื่อดูอาหาร การแสดง ดนตรี ประเพณี หัตถกรรม และฟังเสียงภาษาถิ่น</p>
-        <div class="region-map">${REGIONS.map((r) => `
+        <div class="region-map">${REGIONS.map((r, i) => `
           <button class="region" data-id="${r.id}" style="--c:${r.color}">
-            <div class="big">${r.emoji}</div><h3>${r.title}</h3><p>${r.sub}</p>
+            <span class="region-no">${App.toThaiDigits(i + 1)}</span><h3>${r.title}</h3><p>${r.sub}</p>
           </button>`).join('')}</div>
-        <div class="panel" style="margin-top:18px"><h3>📊 เปรียบเทียบ 4 ภาค</h3><div class="tbl-wrap"><table class="tbl">
-          <tr><th>หัวข้อ</th>${REGIONS.map((r) => `<th>${r.emoji} ${r.title.split(' ')[0]}</th>`).join('')}</tr>
+        <div class="panel" style="margin-top:18px"><h3>เปรียบเทียบ 4 ภาค</h3><div class="tbl-wrap"><table class="tbl">
+          <tr><th>หัวข้อ</th>${REGIONS.map((r) => `<th>${r.title.split(' ')[0]}</th>`).join('')}</tr>
           ${[['อาหาร', 'food'], ['การแสดง', 'show'], ['ดนตรี', 'music'], ['ประเพณี', 'fest']].map(([label, k]) =>
             `<tr><td><b>${label}</b></td>${REGIONS.map((r) => `<td>${r[k].split(' ').slice(0, 3).join(', ')}</td>`).join('')}</tr>`).join('')}
           <tr><td><b>คำว่า "อร่อย"</b></td><td>ลำ</td><td>แซบ</td><td>อร่อย</td><td>หรอย</td></tr>

@@ -37,16 +37,16 @@
 
   const ranatHTML = `
     <div class="panel">
-      <h3>🎹 ระนาดเอกเสมือนจริง (21 ลูก)</h3>
+      <h3>ระนาดเอกเสมือนจริง (21 ลูก)</h3>
       <p class="muted">คลิก/แตะที่ลูกระนาด หรือกดแป้นพิมพ์ <kbd>Z–M</kbd> (เสียงต่ำ) <kbd>A–J</kbd> (กลาง) <kbd>Q–U</kbd> (สูง) — ใช้ระบบเสียงดนตรีไทย 7 เสียงเต็ม</p>
       <div class="ranat-wrap"><div class="ranat">
         ${Array.from({ length: 21 }, (_, i) => `<button class="bar" data-i="${i}" style="height:${172 - i * 3}px">
           ${NOTE_NAMES[i % 7]}<kbd>${KEYS[i].toUpperCase()}</kbd></button>`).join('')}
       </div></div>
       <div class="btn-row" style="margin-top:12px">
-        <button class="btn gold" id="runScale">▶️ ไล่เสียงขึ้น-ลง</button>
-        <button class="btn" id="chingOpen">🔔 ฉิ่ง</button>
-        <button class="btn" id="chingClosed">🔕 ฉับ</button>
+        <button class="btn gold" id="runScale">ไล่เสียงขึ้น-ลง</button>
+        <button class="btn" id="chingOpen">ฉิ่ง</button>
+        <button class="btn" id="chingClosed">ฉับ</button>
         <span class="muted" id="noteCount" style="align-self:center"></span>
       </div>
     </div>

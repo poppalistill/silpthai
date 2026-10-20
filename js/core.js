@@ -53,7 +53,7 @@
   const thaiDate = (iso) => {
     const d = new Date(iso);
     if (isNaN(d)) return iso;
-    return `${d.getDate()} ${THAI_MONTHS[d.getMonth()]} ${d.getFullYear() + 543}`;
+    return toThaiDigits(`${d.getDate()} ${THAI_MONTHS[d.getMonth()]} ${d.getFullYear() + 543}`);
   };
 
   /* ---------- บทบาทผู้ใช้ (Role) และสิทธิ์ ---------- */
@@ -80,10 +80,13 @@
     { id: 'fav',      icon: '❤️', name: 'คนรักวัฒนธรรม',    desc: 'มีรายการโปรด 5 รายการ',          test: (s, u) => (App.udata('favs', []).length) >= 5 },
     { id: 'chat',     icon: '💬', name: 'ช่างซักถาม',       desc: 'คุยกับน้องมาลัย 5 ข้อความ',       test: (s) => (s.chats || 0) >= 5 }
   ];
+  const GROUP_LABELS = { main: 'ผู้ช่วย', learn: 'คลังความรู้', play: 'ลงมือทำ', service: 'บริการ', account: 'บัญชีและระบบ' };
+  const favLabel = (key) => (App.isFav(key) ? 'อยู่ในเรื่องโปรดแล้ว' : 'บันทึกเป็นเรื่องโปรด');
   const LEVELS = ['ผู้เริ่มต้น', 'ผู้ฝึกหัด', 'ผู้รู้', 'ผู้ชำนาญ', 'ผู้เชี่ยวชาญ', 'ปราชญ์ศิลป์ไทย'];
 
   const App = window.App = {
-    cfg: CFG, store, esc, strip, uid, $, $$, THAI_MONTHS, toThaiDigits, thaiDate,
+    cfg: CFG, store, esc, strip, uid, $, $$, THAI_MONTHS, toThaiDigits, thaiDate, GROUP_LABELS,
+    initial: (name) => (String(name || '').trim().match(/[ก-ฮA-Za-z0-9]/) || ['?'])[0],
     ROLES, MEMBER_ROLES, BADGES,
     modules: [],
     byId: {},
@@ -116,7 +119,7 @@
       const users = this.users();
       let u = users.find((x) => x.name === name && x.role === role);
       if (!u) {
-        u = { id: uid(), name, role, avatar: ROLES[role].icon, created: new Date().toISOString() };
+        u = { id: uid(), name, role, created: new Date().toISOString() };
         users.push(u);
         this.saveUsers(users);
       }
@@ -189,7 +192,7 @@
         this.usave('badges', now);
         fresh.forEach((id, i) => {
           const b = BADGES.find((x) => x.id === id);
-          setTimeout(() => this.ui.toast(`${b.icon} ได้รับเหรียญ "${b.name}"`, 'badge'), 900 * (i + 1));
+          setTimeout(() => this.ui.toast(`ได้รับเหรียญ "${b.name}"`, 'badge'), 900 * (i + 1));
         });
       }
     },
@@ -207,7 +210,7 @@
       } else {
         list.unshift(Object.assign({ added: new Date().toISOString() }, fav));
         this.usave('favs', list);
-        this.ui.toast('❤️ เพิ่มในรายการโปรดแล้ว', 'ok');
+        this.ui.toast('บันทึกเป็นเรื่องโปรดแล้ว', 'ok');
         this.checkBadges();
       }
       this.emit('favs');
@@ -284,7 +287,7 @@
       const wrap = document.createElement('div');
       wrap.className = 'modal-wrap';
       wrap.innerHTML = `<div class="modal ${opts.wide ? 'wide' : ''}" role="dialog" aria-modal="true">
-          <button class="modal-x" aria-label="ปิด">✕</button>${html}</div>`;
+          <button class="modal-x" aria-label="ปิด">ปิด</button>${html}</div>`;
       document.body.appendChild(wrap);
       document.body.classList.add('no-scroll');
       const close = () => {
@@ -305,23 +308,28 @@
 
     confirm(msg) { return window.confirm(msg); },
 
+    /* หัวเรื่องของแต่ละหน้า: "หมวด ๐๕ · คลังความรู้" + ชื่อ + คำอธิบาย + ลายประจำยาม */
     pageHead(m, extra) {
-      return `<header class="page-head" style="--c:${m.color || 'var(--gold)'}">
-        <div class="page-icon">${m.icon}</div>
-        <div><h1>${m.title}</h1><p>${m.desc || ''}</p></div>
+      const no = m.no ? `หมวด ${toThaiDigits(String(m.no).padStart(2, '0'))} · ` : '';
+      return `<header class="page-head">
+        <div class="kicker">${no}${GROUP_LABELS[m.group] || ''}</div>
+        <h1>${m.title}</h1>
+        ${m.desc ? `<p class="lede">${m.desc}</p>` : ''}
         ${extra || ''}
+        <div class="ornament"><i></i></div>
       </header>`;
     },
 
-    card(it, m) {
-      return `<button class="card" data-id="${esc(it.id)}" style="--c:${it.color || m.color || 'var(--gold)'}">
-        <span class="card-emoji">${it.emoji || m.icon}</span>
+    /* แถวรายการแบบสารบัญหนังสือ (i = ลำดับ ถ้ามี) */
+    card(it, m, i) {
+      return `<button class="card" data-id="${esc(it.id)}">
+        ${i != null ? `<span class="card-no">${toThaiDigits(String(i + 1).padStart(2, '0'))}</span>` : ''}
         <span class="card-body">
+          ${it.cat ? `<span class="card-cat">${it.cat}</span>` : ''}
           <span class="card-title">${it.title}</span>
           ${it.sub ? `<span class="card-sub">${it.sub}</span>` : ''}
-          ${it.cat ? `<span class="chip sm">${it.cat}</span>` : ''}
         </span>
-        ${App.isFav(m.id + ':' + it.id) ? '<span class="card-fav">❤️</span>' : ''}
+        ${App.isFav(m.id + ':' + it.id) ? '<span class="card-fav">เรื่องโปรด</span>' : ''}
       </button>`;
     },
 
@@ -341,7 +349,7 @@
       const draw = () => {
         const list = items.filter((i) => (!cat || i.cat === cat) &&
           (!q || (i.title + ' ' + (i.sub || '') + ' ' + strip(i.body) + ' ' + (i.tags || []).join(' ')).toLowerCase().includes(q)));
-        grid.innerHTML = list.length ? list.map((i) => App.ui.card(i, m)).join('') : '<p class="empty">ไม่พบข้อมูลที่ค้นหา</p>';
+        grid.innerHTML = list.length ? list.map((i, n) => App.ui.card(i, m, n)).join('') : '<p class="empty">ไม่พบข้อมูลที่ค้นหา</p>';
       };
       draw();
       $('.search-in', el).addEventListener('input', (e) => { q = e.target.value.trim().toLowerCase(); draw(); });
@@ -365,32 +373,33 @@
       if (!it) return;
       const key = m.id + ':' + it.id;
       const html = `
-        <div class="detail-hero" style="--c:${it.color || m.color || 'var(--gold)'}">
-          <span class="detail-emoji">${it.emoji || m.icon}</span>
-          <div><small>${m.icon} ${m.title}${it.cat ? ' · ' + it.cat : ''}</small>
-          <h2>${it.title}</h2>${it.sub ? `<p>${it.sub}</p>` : ''}</div>
-        </div>
-        <div class="detail-actions">
-          <button class="btn fav-btn">${App.isFav(key) ? '❤️ อยู่ในรายการโปรด' : '🤍 เพิ่มรายการโปรด'}</button>
-          <button class="btn tts-btn">🔊 อ่านออกเสียง</button>
-          <button class="btn share-btn">🔗 แชร์</button>
-        </div>
-        <div class="detail-body prose">${it.body || ''}</div>
-        ${it.tags && it.tags.length ? `<div class="chips tags">${it.tags.map((t) => `<span class="chip sm">#${t}</span>`).join('')}</div>` : ''}`;
+        <article class="sheet">
+          <div class="kicker">${m.title}${it.cat ? ' · ' + it.cat : ''}</div>
+          <h2>${it.title}</h2>
+          ${it.sub ? `<p class="lede">${it.sub}</p>` : ''}
+          <div class="detail-actions">
+            <button class="btn sm fav-btn">${favLabel(key)}</button>
+            <button class="btn sm tts-btn">ฟังเสียงอ่าน</button>
+            <button class="btn sm share-btn">แชร์ลิงก์</button>
+          </div>
+          <div class="ornament"><i></i></div>
+          <div class="detail-body prose">${it.body || ''}</div>
+          ${it.tags && it.tags.length ? `<div class="tags">คำค้น: ${it.tags.join(', ')}</div>` : ''}
+        </article>`;
       const w = App.ui.modal(html, {
         onClose: () => { history.replaceState(null, '', '#/' + m.id); if (onClose) onClose(); }
       });
       const favBtn = $('.fav-btn', w);
       favBtn.onclick = () => {
-        if (App.toggleFav({ key, mod: m.id, id: it.id, title: it.title, emoji: it.emoji || m.icon, modTitle: m.title })) {
-          favBtn.textContent = App.isFav(key) ? '❤️ อยู่ในรายการโปรด' : '🤍 เพิ่มรายการโปรด';
+        if (App.toggleFav({ key, mod: m.id, id: it.id, title: it.title, modTitle: m.title })) {
+          favBtn.textContent = favLabel(key);
         }
       };
       const ttsBtn = $('.tts-btn', w);
       ttsBtn.onclick = () => {
-        if (App.speaking) { App.stopSpeak(); ttsBtn.textContent = '🔊 อ่านออกเสียง'; return; }
-        ttsBtn.textContent = '⏹ หยุดอ่าน';
-        App.speak(it.title + ' . ' + (it.sub || '') + ' . ' + strip(it.body), () => { ttsBtn.textContent = '🔊 อ่านออกเสียง'; });
+        if (App.speaking) { App.stopSpeak(); ttsBtn.textContent = 'ฟังเสียงอ่าน'; return; }
+        ttsBtn.textContent = 'หยุดอ่าน';
+        App.speak(it.title + ' . ' + (it.sub || '') + ' . ' + strip(it.body), () => { ttsBtn.textContent = 'ฟังเสียงอ่าน'; });
       };
       $('.share-btn', w).onclick = async () => {
         const url = location.href.split('#')[0] + `#/${m.id}/${encodeURIComponent(it.id)}`;

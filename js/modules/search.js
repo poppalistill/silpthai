@@ -13,7 +13,7 @@ App.register({
     el.innerHTML = App.ui.pageHead(this) + `
       <form class="toolbar" id="sForm" style="flex-direction:row">
         <input class="input" id="sIn" type="search" placeholder="พิมพ์คำค้นหา เช่น ผีตาโขน, ชุดไทย, แคน" value="${App.esc(param || '')}" autofocus>
-        ${canVoice ? '<button class="btn" type="button" id="sMic" title="ค้นหาด้วยเสียง">🎤</button>' : ''}
+        ${canVoice ? '<button class="btn" type="button" id="sMic" title="ค้นหาด้วยเสียง">พูด</button>' : ''}
         <button class="btn primary" type="submit">ค้นหา</button>
       </form>
       <div class="chips" style="margin-bottom:16px"><span class="muted" style="align-self:center">ยอดนิยม:</span>
@@ -27,8 +27,8 @@ App.register({
       if (!q) { out.innerHTML = '<p class="empty">พิมพ์คำที่ต้องการค้นหา</p>'; return; }
       const res = App.search(q);
       out.innerHTML = `<p class="muted">พบ ${res.length} รายการสำหรับ "<b>${App.esc(q)}</b>"</p>` +
-        (res.length ? `<div class="grid cards">${res.map((it) => App.ui.card(Object.assign({}, it, { id: it.mod.id + '|' + it.id, cat: it.mod.icon + ' ' + it.mod.title }), it.mod)).join('')}</div>`
-          : '<p class="empty">ไม่พบผลลัพธ์ ลองใช้คำอื่น หรือถามน้องมาลัยดูนะ 💬</p>');
+        (res.length ? `<div class="grid cards">${res.map((it) => App.ui.card(Object.assign({}, it, { id: it.mod.id + '|' + it.id, cat: it.mod.title }), it.mod)).join('')}</div>`
+          : '<p class="empty">ไม่พบผลลัพธ์ ลองใช้คำอื่น หรือถามน้องมาลัยดูนะ </p>');
     };
     App.$('#sForm', el).onsubmit = (e) => { e.preventDefault(); run(input.value); };
     App.$('.chips', el).addEventListener('click', (e) => { const b = e.target.closest('[data-q]'); if (b) { input.value = b.dataset.q; run(b.dataset.q); } });
@@ -41,9 +41,9 @@ App.register({
     if (mic) mic.onclick = () => {
       const R = window.SpeechRecognition || window.webkitSpeechRecognition;
       const r = new R(); r.lang = 'th-TH'; r.interimResults = false;
-      mic.textContent = '🔴'; App.ui.toast('กำลังฟัง... พูดคำค้นหาได้เลย');
+      mic.textContent = 'กำลังฟัง…'; App.ui.toast('กำลังฟัง... พูดคำค้นหาได้เลย');
       r.onresult = (ev) => { input.value = ev.results[0][0].transcript; run(input.value); };
-      r.onend = () => { mic.textContent = '🎤'; };
+      r.onend = () => { mic.textContent = 'พูด'; };
       r.onerror = () => App.ui.toast('ไม่สามารถใช้ไมโครโฟนได้', 'warn');
       r.start();
     };

@@ -25,14 +25,14 @@ App.register({
           <div class="stat"><b>${quiz.length}</b><small>ครั้งที่ทำแบบทดสอบ</small></div>
           <div class="stat"><b>${App.allItems().length}</b><small>เนื้อหาในระบบ</small></div>
         </div>
-        <div class="panel"><h3>👥 ผู้ใช้แยกตามบทบาท</h3>
+        <div class="panel"><h3>ผู้ใช้แยกตามบทบาท</h3>
           ${roleCount.map(([r, n]) => `<div style="display:flex;align-items:center;gap:10px;margin:6px 0">
-            <span style="width:150px">${App.ROLES[r].icon} ${App.ROLES[r].label}</span>
+            <span style="width:150px">${App.ROLES[r].label}</span>
             <div class="progress" style="flex:1"><i style="width:${users.length ? (n / users.length) * 100 : 0}%"></i></div><b>${n}</b></div>`).join('')}
         </div>
 
         <div class="grid cols-2">
-          <div class="panel"><h3>➕ เพิ่มกิจกรรมใหม่</h3>
+          <div class="panel"><h3>เพิ่มกิจกรรมใหม่</h3>
             <form id="evForm">
               <label class="field"><span>ชื่อกิจกรรม *</span><input class="input" name="title" required></label>
               <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
@@ -41,32 +41,31 @@ App.register({
                 <label class="field"><span>จำนวนที่นั่ง *</span><input class="input" type="number" name="capacity" min="1" value="20" required></label>
                 <label class="field"><span>ราคา (บาท)</span><input class="input" type="number" name="price" min="0" value="0"></label>
                 <label class="field"><span>หมวด</span><input class="input" name="cat" placeholder="งานประดิษฐ์"></label>
-                <label class="field"><span>อีโมจิ</span><input class="input" name="emoji" value="🎉" maxlength="4"></label>
               </div>
               <label class="field"><span>สถานที่ *</span><input class="input" name="place" required></label>
               <label class="field"><span>รายละเอียด</span><textarea class="input" name="desc" rows="2"></textarea></label>
               <button class="btn primary">บันทึกกิจกรรม</button>
             </form>
           </div>
-          <div class="panel"><h3>📋 กิจกรรมทั้งหมด</h3>
+          <div class="panel"><h3>กิจกรรมทั้งหมด</h3>
             <div class="tbl-wrap"><table class="tbl"><tr><th>กิจกรรม</th><th>วันที่</th><th>จอง</th><th></th></tr>
-              ${evs.map((e) => `<tr><td>${e.emoji || ''} ${App.esc(e.title)}</td><td>${App.thaiDate(e.date)}</td><td>${App.events.taken(e.id)}/${e.capacity}</td>
+              ${evs.map((e) => `<tr><td>${App.esc(e.title)}</td><td>${App.thaiDate(e.date)}</td><td>${App.events.taken(e.id)}/${e.capacity}</td>
                 <td><button class="btn sm danger" data-del-ev="${e.id}">ลบ</button></td></tr>`).join('')}
             </table></div>
-            <button class="btn sm" id="seed" style="margin-top:10px">↺ คืนค่ากิจกรรมตัวอย่าง</button>
+            <button class="btn sm" id="seed" style="margin-top:10px">คืนค่ากิจกรรมตัวอย่าง</button>
           </div>
         </div>
 
-        <div class="panel"><h3>🎟️ รายการจองทั้งหมด</h3>
+        <div class="panel"><h3>รายการจองทั้งหมด</h3>
           ${bks.length ? `<div class="tbl-wrap"><table class="tbl"><tr><th>รหัส</th><th>กิจกรรม</th><th>ผู้จอง</th><th>โทร</th><th>ที่นั่ง</th><th>วันที่จอง</th></tr>
             ${bks.slice().reverse().map((b) => { const e = evs.find((x) => x.id === b.eventId); return `<tr><td>${b.code}</td><td>${e ? App.esc(e.title) : '-'}</td>
               <td>${App.esc(b.name)}</td><td>${App.esc(b.phone)}</td><td>${b.qty}</td><td>${App.thaiDate(b.created)}</td></tr>`; }).join('')}
           </table></div>` : '<p class="muted">ยังไม่มีการจอง</p>'}
         </div>
 
-        <div class="panel"><h3>👤 จัดการผู้ใช้</h3>
+        <div class="panel"><h3>จัดการผู้ใช้</h3>
           <div class="tbl-wrap"><table class="tbl"><tr><th>ผู้ใช้</th><th>บทบาท</th><th>คะแนน</th><th>สมัครเมื่อ</th><th></th></tr>
-            ${users.map((u) => `<tr><td>${App.esc(u.avatar)} ${App.esc(u.name)}${u.id === me.id ? ' <small class="muted">(คุณ)</small>' : ''}</td>
+            ${users.map((u) => `<tr><td>${App.esc(u.name)}${u.id === me.id ? ' <small class="muted">(คุณ)</small>' : ''}</td>
               <td><select class="input" style="padding:4px 8px" data-role="${u.id}" ${u.id === me.id ? 'disabled' : ''}>
                 ${App.MEMBER_ROLES.map((r) => `<option value="${r}" ${u.role === r ? 'selected' : ''}>${App.ROLES[r].label}</option>`).join('')}</select></td>
               <td>${App.store.get(`u:${u.id}:points`, 0)}</td><td>${App.thaiDate(u.created)}</td>
@@ -74,11 +73,11 @@ App.register({
           </table></div>
         </div>
 
-        <div class="panel"><h3>💾 สำรองและรีเซ็ตข้อมูล</h3>
+        <div class="panel"><h3>สำรองและรีเซ็ตข้อมูล</h3>
           <div class="btn-row">
-            <button class="btn" id="export">⬇️ ส่งออกข้อมูลทั้งหมด (JSON)</button>
-            <label class="btn">⬆️ นำเข้าข้อมูล<input type="file" id="import" accept="application/json" hidden></label>
-            <button class="btn danger" id="resetAll">⚠️ รีเซ็ตระบบทั้งหมด</button>
+            <button class="btn" id="export">ส่งออกข้อมูลทั้งหมด (JSON)</button>
+            <label class="btn">นำเข้าข้อมูล<input type="file" id="import" accept="application/json" hidden></label>
+            <button class="btn danger" id="resetAll">รีเซ็ตระบบทั้งหมด</button>
           </div>
         </div>`;
 
@@ -86,7 +85,7 @@ App.register({
       f.onsubmit = (e) => {
         e.preventDefault();
         const ev = { id: 'ev' + App.uid(), title: f.title.value.trim(), date: f.date.value, time: f.time.value.trim() || '-', capacity: +f.capacity.value,
-          price: +f.price.value || 0, cat: f.cat.value.trim() || 'กิจกรรม', emoji: f.emoji.value.trim() || '🎉', place: f.place.value.trim(), desc: f.desc.value.trim() };
+          price: +f.price.value || 0, cat: f.cat.value.trim() || 'กิจกรรม', place: f.place.value.trim(), desc: f.desc.value.trim() };
         App.store.set('events', evs.concat(ev));
         App.ui.toast('เพิ่มกิจกรรมแล้ว', 'ok'); draw();
       };

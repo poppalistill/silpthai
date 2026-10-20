@@ -58,23 +58,23 @@
         el.innerHTML = App.ui.pageHead(m) + `
           <div class="grid cols-2">
             <div class="panel">
-              <h3>📝 พร้อมทดสอบหรือยัง?</h3>
+              <h3>พร้อมทดสอบหรือยัง?</h3>
               <p>คลังข้อสอบ ${BANK.length} ข้อ ครอบคลุมนาฏศิลป์ ดนตรี ประเพณี อาหาร วรรณคดี และมารยาทไทย</p>
               <ul class="muted"><li>สุ่ม ${N} ข้อ ข้อละ ${SEC} วินาที</li><li>ตอบถูกได้ 1 คะแนน + เฉลยทันที</li><li>สมาชิกได้รับคะแนนสะสม ข้อละ 2 คะแนน</li></ul>
-              ${App.isMember() ? '' : '<p class="muted">⚠️ ผู้เยี่ยมชมทำได้ แต่ระบบจะไม่บันทึกคะแนน</p>'}
-              <button class="btn primary" id="qStart">▶️ เริ่มทำแบบทดสอบ</button>
+              ${App.isMember() ? '' : '<p class="muted">ผู้เยี่ยมชมทำได้ แต่ระบบจะไม่บันทึกคะแนน</p>'}
+              <button class="btn primary" id="qStart">เริ่มทำแบบทดสอบ</button>
             </div>
             <div class="panel">
-              <h3>🥇 ตารางอันดับ (ในเครื่องนี้)</h3>
+              <h3>ตารางอันดับ (ในเครื่องนี้)</h3>
               ${board.length ? `<table class="tbl"><tr><th>#</th><th>ชื่อ</th><th>คะแนน</th></tr>
-                ${board.map((r, i) => `<tr><td>${['🥇', '🥈', '🥉'][i] || i + 1}</td><td>${App.esc(r.name)}</td><td>${r.score}/${N}</td></tr>`).join('')}</table>`
+                ${board.map((r, i) => `<tr><td>${['', '', ''][i] || i + 1}</td><td>${App.esc(r.name)}</td><td>${r.score}/${N}</td></tr>`).join('')}</table>`
                 : '<p class="muted">ยังไม่มีผู้ทำแบบทดสอบ</p>'}
             </div>
           </div>
-          ${staff ? `<div class="panel"><h3>🧑‍🏫 ผลคะแนนทั้งหมด (สำหรับครู/ผู้ดูแล)</h3>
+          ${staff ? `<div class="panel"><h3>ผลคะแนนทั้งหมด (สำหรับครู/ผู้ดูแล)</h3>
             ${res.length ? `<div class="tbl-wrap"><table class="tbl"><tr><th>วันที่</th><th>ชื่อ</th><th>บทบาท</th><th>คะแนน</th><th>เวลา (วินาที)</th></tr>
             ${res.slice().reverse().map((r) => `<tr><td>${new Date(r.date).toLocaleString('th-TH')}</td><td>${App.esc(r.name)}</td><td>${App.ROLES[r.role] ? App.ROLES[r.role].label : r.role}</td><td>${r.score}/${N}</td><td>${r.time}</td></tr>`).join('')}
-            </table></div><div class="btn-row" style="margin-top:10px"><button class="btn sm" id="qCsv">⬇️ ดาวน์โหลด CSV</button></div>` : '<p class="muted">ยังไม่มีข้อมูล</p>'}</div>` : ''}`;
+            </table></div><div class="btn-row" style="margin-top:10px"><button class="btn sm" id="qCsv">ดาวน์โหลด CSV</button></div>` : '<p class="muted">ยังไม่มีข้อมูล</p>'}</div>` : ''}`;
         App.$('#qStart', el).onclick = start;
         const csv = App.$('#qCsv', el);
         if (csv) csv.onclick = () => {
@@ -97,7 +97,7 @@
           let left = SEC;
           el.innerHTML = App.ui.pageHead(m) + `<div class="panel">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><b>ข้อ ${i + 1} / ${N}</b>
-              <span>คะแนน <span class="badge-num">${score}</span> · ⏱️ <b id="qLeft">${left}</b> วิ</span></div>
+              <span>คะแนน <span class="badge-num">${score}</span> · <b id="qLeft">${left}</b> วิ</span></div>
             <div class="progress" style="margin:10px 0"><i style="width:${(i / N) * 100}%"></i></div>
             <p class="quiz-q">${q.q}</p>
             <div class="quiz-opts">${q.opts.map((o, k) => `<button class="quiz-opt" data-k="${k}">${'กขคง'[k]}. ${o}</button>`).join('')}</div>
@@ -111,8 +111,8 @@
             });
             const ok = k === q.ans;
             if (ok) score++;
-            App.$('#qWhy', el).innerHTML = `<p>${ok ? '✅ ถูกต้อง!' : k < 0 ? '⌛ หมดเวลา' : '❌ ยังไม่ถูก'} — ${q.why}</p>
-              <button class="btn primary" id="qNext">${i + 1 < N ? 'ข้อต่อไป ▶' : 'ดูผลคะแนน 🏁'}</button>`;
+            App.$('#qWhy', el).innerHTML = `<p>${ok ? 'ถูกต้อง!' : k < 0 ? 'หมดเวลา' : 'ยังไม่ถูก'} — ${q.why}</p>
+              <button class="btn primary" id="qNext">${i + 1 < N ? 'ข้อต่อไป ' : 'ดูผลคะแนน '}</button>`;
             App.$('#qNext', el).onclick = () => { i++; i < N ? show() : finish(); };
           };
           App.$('.quiz-opts', el).addEventListener('click', (e) => { const b = e.target.closest('.quiz-opt'); if (b && !b.disabled) answer(+b.dataset.k); });
@@ -127,11 +127,11 @@
             if (score > (App.stats().quizBest || 0)) App.setStat('quizBest', score);
             if (score) App.addPoints(score * 2, 'แบบทดสอบ');
           }
-          const msg = score >= 9 ? 'ยอดเยี่ยม! คุณคือปราชญ์ศิลป์ไทย 🏆' : score >= 7 ? 'เก่งมาก! 🎉' : score >= 5 ? 'ดีแล้ว ลองอ่านเพิ่มอีกนิด 📚' : 'ไม่เป็นไร ลองเรียนรู้แล้วกลับมาใหม่ 💪';
+          const msg = score >= 9 ? 'ยอดเยี่ยม! คุณคือปราชญ์ศิลป์ไทย ' : score >= 7 ? 'เก่งมาก! ' : score >= 5 ? 'ดีแล้ว ลองอ่านเพิ่มอีกนิด ' : 'ไม่เป็นไร ลองเรียนรู้แล้วกลับมาใหม่ ';
           el.innerHTML = App.ui.pageHead(m) + `<div class="panel" style="text-align:center">
-            <div style="font-size:4rem">${score >= 7 ? '🏆' : score >= 5 ? '🎖️' : '📚'}</div>
+            <div class="score-seal">${App.toThaiDigits(score)}<small>/${App.toThaiDigits(N)}</small></div>
             <h2>ได้ ${score} / ${N} คะแนน</h2><p>${msg}</p><p class="muted">ใช้เวลา ${time} วินาที</p>
-            <div class="btn-row" style="justify-content:center"><button class="btn primary" id="qAgain">🔁 ทำอีกครั้ง</button><button class="btn" id="qHome">📊 ดูตารางอันดับ</button></div></div>`;
+            <div class="btn-row" style="justify-content:center"><button class="btn primary" id="qAgain">ทำอีกครั้ง</button><button class="btn" id="qHome">ดูตารางอันดับ</button></div></div>`;
           App.$('#qAgain', el).onclick = start;
           App.$('#qHome', el).onclick = home;
         };

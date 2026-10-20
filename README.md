@@ -163,5 +163,6 @@ ThaiCultureApp/
 - HTML5, CSS3 (CSS Variables, Grid, โหมดมืด), JavaScript ES2020 (ไม่มี framework)
 - Web Audio API (ระนาด/ฉิ่ง) · Canvas API (ฝึกเขียน/บันทึกภาพ) · SVG (ระบายสี)
 - Web Speech API (อ่านออกเสียง + ค้นหาด้วยเสียง) · localStorage · Service Worker (PWA)
-- ฟอนต์ Google Fonts: Mitr, Sarabun
+- ฟอนต์ Google Fonts: Noto Serif Thai (หัวเรื่อง), IBM Plex Sans Thai (เนื้อความ)
+- แนวการออกแบบ "สมุดศิลป์": จัดหน้าแบบหนังสือ ลำดับด้วยเลขไทย ใช้ลายประจำยามเป็นตัวคั่น ไม่ใช้อีโมจิตกแต่ง
 - พัฒนาด้วย AI: Claude Code

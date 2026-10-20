@@ -31,12 +31,12 @@
             <div class="chips" style="margin-bottom:10px"><button class="chip on" data-set="c">พยัญชนะ 44 ตัว</button><button class="chip" data-set="n">เลขไทย</button></div>
             <h3 id="wName" style="font-size:1.5rem"></h3>
             <div class="btn-row" style="margin-bottom:10px">
-              <button class="btn sm" id="wSay">🔊 ฟังเสียง</button>
-              <button class="btn sm" id="wClear">🧽 ล้าง</button>
-              <button class="btn sm primary" id="wCheck">✅ ตรวจ</button>
+              <button class="btn sm" id="wSay">ฟังเสียง</button>
+              <button class="btn sm" id="wClear">ล้าง</button>
+              <button class="btn sm primary" id="wCheck">ตรวจ</button>
             </div>
             <div id="wResult" class="muted" style="min-height:52px">ลากนิ้วหรือเมาส์ตามเส้นตัวอักษรสีจาง แล้วกด "ตรวจ"</div>
-            <div class="btn-row" style="margin:10px 0"><button class="btn sm" id="wPrev">◀ ตัวก่อน</button><button class="btn sm gold" id="wNext">ตัวถัดไป ▶</button></div>
+            <div class="btn-row" style="margin:10px 0"><button class="btn sm" id="wPrev">ตัวก่อน</button><button class="btn sm gold" id="wNext">ตัวถัดไป </button></div>
             <div class="letter-strip" id="strip"></div>
           </div>
         </div>`;
@@ -93,12 +93,12 @@
           if (k) { I++; if (tol[i] > 0) inside++; }
           if (l && k) cover++;
         }
-        if (I < 30) { result.innerHTML = '✏️ ยังไม่ได้เขียน ลองลากเส้นตามตัวอักษรก่อนนะ'; return; }
+        if (I < 30) { result.innerHTML = 'ยังไม่ได้เขียน ลองลากเส้นตามตัวอักษรก่อนนะ'; return; }
         const c = cover / L, p = inside / I;
         const score = Math.round(100 * (2 * c * p) / (c + p || 1));
-        const stars = score >= 80 ? '⭐⭐⭐' : score >= 60 ? '⭐⭐' : score >= 40 ? '⭐' : '';
-        result.innerHTML = `<b style="font-size:1.4rem">${score} คะแนน</b> ${stars}<br>` +
-          (score >= 60 ? '🎉 เยี่ยมมาก! เขียนได้สวยงาม' : 'ลองอีกครั้ง พยายามลากให้ทับเส้นสีจาง');
+        const stars = score >= 80 ? 'ดีมาก' : score >= 60 ? 'ผ่าน' : score >= 40 ? 'เกือบผ่าน' : '';
+        result.innerHTML = `<b style="font-size:1.4rem">${score} คะแนน</b> <span class="chip sm">${stars || 'ลองใหม่'}</span><br>` +
+          (score >= 60 ? 'เยี่ยมมาก! เขียนได้สวยงาม' : 'ลองอีกครั้ง พยายามลากให้ทับเส้นสีจาง');
         if (score >= 60 && App.isMember() && !done().includes(set[idx].ch)) {
           App.usave('writingDone', done().concat(set[idx].ch));
           App.bump('writing');

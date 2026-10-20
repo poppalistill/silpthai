@@ -42,13 +42,13 @@
     render(el, param) {
       let idx = dayIndex();
       const before = `<div class="grid cols-2" style="margin-bottom:18px">
-        <div class="panel"><h3>🌞 สำนวนวันนี้</h3><p style="font-size:1.3rem;font-family:var(--font-head);margin:0">${items[idx].title}</p>
-          <p class="muted">${items[idx].sub}</p><button class="btn sm" id="sayToday">🔊 ฟังเสียง</button></div>
-        <div class="panel"><h3>🃏 บัตรคำพลิกทาย</h3>
+        <div class="panel"><h3>สำนวนวันนี้</h3><p style="font-size:1.3rem;font-family:var(--font-head);margin:0">${items[idx].title}</p>
+          <p class="muted">${items[idx].sub}</p><button class="btn sm" id="sayToday">ฟังเสียง</button></div>
+        <div class="panel"><h3>บัตรคำพลิกทาย</h3>
           <div class="flash" id="flash"><div class="flash-inner">
             <div class="flash-face flash-front" id="ffront"></div><div class="flash-face flash-back" id="fback"></div>
           </div></div>
-          <div class="btn-row" style="margin-top:10px"><button class="btn sm" id="fPrev">◀ ก่อนหน้า</button><button class="btn sm gold" id="fNext">สุ่มใบใหม่ ▶</button></div>
+          <div class="btn-row" style="margin-top:10px"><button class="btn sm" id="fPrev">ก่อนหน้า</button><button class="btn sm gold" id="fNext">สุ่มใบใหม่ </button></div>
           <p class="muted" style="font-size:.85rem;margin:6px 0 0">แตะที่บัตรเพื่อพลิกดูความหมาย</p>
         </div></div>`;
       App.ui.listPage(this, el, param, { before });
