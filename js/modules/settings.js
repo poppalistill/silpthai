@@ -24,7 +24,10 @@ App.register({
         </div>
         <div class="panel"><h3>เสียงอ่านภาษาไทย</h3>
           <label class="field"><span>ความเร็ว: <b id="rv">${rate}x</b></span><input type="range" id="rate" min="0.6" max="1.6" step="0.1" value="${rate}" style="width:100%"></label>
+          <label class="field"><span>เสียงผู้อ่าน</span><select class="input" id="voice"></select></label>
           <button class="btn sm" id="ttsTest">ทดสอบเสียง</button>
+          <p class="muted" style="font-size:.85rem;margin-top:10px">เสียงที่เป็นธรรมชาติที่สุด: เปิดแอปด้วย <b>Microsoft Edge</b> แล้วเลือก "Premwadee" หรือ "Niwat" (Natural) ·
+          ใน Chrome เลือก "Google ไทย"</p>
           <p class="muted" style="font-size:.85rem">ใช้เสียงอ่านของระบบปฏิบัติการ หากไม่มีเสียงภาษาไทย ให้ติดตั้ง Thai voice ในการตั้งค่าเครื่อง</p>
         </div>
         <div class="panel"><h3>ติดตั้งเป็นแอปบนมือถือ</h3>
@@ -41,6 +44,17 @@ App.register({
     App.$$('[data-theme]', el).forEach((b) => b.onclick = () => { st.set('theme', b.dataset.theme); App.applySettings(); this.render(el); });
     App.$$('[data-fs]', el).forEach((b) => b.onclick = () => { st.set('fontScale', +b.dataset.fs); App.applySettings(); this.render(el); });
     App.$('#rate', el).oninput = (e) => { st.set('ttsRate', +e.target.value); App.$('#rv', el).textContent = e.target.value + 'x'; };
+    const voiceSel = App.$('#voice', el);
+    const fillVoices = () => {
+      const list = 'speechSynthesis' in window ? App.thaiVoices() : [];
+      const cur = App.thaiVoice();
+      voiceSel.innerHTML = list.length
+        ? list.map((v) => `<option value="${App.esc(v.name)}" ${cur && cur.name === v.name ? 'selected' : ''}>${App.esc(v.name)}${/natural|neural/i.test(v.name) ? ' — แนะนำ' : ''}</option>`).join('')
+        : '<option>ไม่พบเสียงภาษาไทยในเบราว์เซอร์นี้</option>';
+    };
+    fillVoices();
+    if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = fillVoices;
+    voiceSel.onchange = () => { st.set('ttsVoice', voiceSel.value); App.speak('สวัสดีค่ะ นี่คือเสียงผู้อ่านที่คุณเลือก'); };
     App.$('#ttsTest', el).onclick = () => App.speak('สวัสดีค่ะ ยินดีต้อนรับสู่แอปศิลป์ไทย เรียนรู้ อนุรักษ์ และสืบสานศิลปวัฒนธรรมไทย');
     App.$('#clearMine', el).onclick = () => {
       if (!App.ui.confirm('ล้างคะแนน สถิติ เหรียญ รายการโปรด และแกลเลอรีของคุณ?')) return;

@@ -218,26 +218,63 @@
     },
 
     /* ---------- อ่านออกเสียง (Text-to-Speech) ---------- */
-    /* อ่านทีละท่อนสั้น ๆ (ไม่เกิน ~160 ตัวอักษร) เพราะเสียงภาษาไทยของเบราว์เซอร์
-     * มักกระตุก/ขาดหายเมื่อส่งข้อความยาวทีเดียว และเลือกเสียงที่ติดตั้งในเครื่องก่อนเสียงออนไลน์ */
+    /* การอ่านให้เป็นธรรมชาติ:
+     * 1) เลือกเสียงที่ดีที่สุด: เสียง Natural (Edge) > Google ไทย (Chrome) > เสียงเก่าของ Windows
+     *    หรือเสียงที่ผู้ใช้เลือกเองในหน้า "ตั้งค่า"
+     * 2) แบ่งอ่านทีละประโยค (ตามย่อหน้า/รายการ/ช่องว่าง) ไม่ตัดกลางวลี
+     * 3) แปลงคำย่อให้อ่านถูก เช่น พ.ศ. → พุทธศักราช, จ. → จังหวัด */
     speaking: false,
     _ttsRun: 0,
-    thaiVoice() {
-      const th = speechSynthesis.getVoices().filter((v) => v.lang && v.lang.toLowerCase().replace('_', '-').startsWith('th'));
-      return th.find((v) => v.localService) || th[0] || null;
+    thaiVoices() {
+      const rank = (v) => (/natural|neural/i.test(v.name) ? 3 : /online|google/i.test(v.name) ? 2 : 1);
+      return speechSynthesis.getVoices()
+        .filter((v) => v.lang && v.lang.toLowerCase().replace('_', '-').startsWith('th'))
+        .sort((a, b) => rank(b) - rank(a));
     },
-    ttsChunks(text, max) {
-      max = max || 160;
-      const words = strip(text).replace(/\s*\.\s*/g, ' ').split(/\s+/).filter(Boolean);
+    thaiVoice() {
+      const list = this.thaiVoices();
+      const chosen = store.get('ttsVoice', '');
+      return list.find((v) => v.name === chosen) || list[0] || null;
+    },
+    ttsNormalize(t) {
+      const MONTHS = { 'ม.ค.': 'มกราคม', 'ก.พ.': 'กุมภาพันธ์', 'มี.ค.': 'มีนาคม', 'เม.ย.': 'เมษายน', 'พ.ค.': 'พฤษภาคม', 'มิ.ย.': 'มิถุนายน',
+        'ก.ค.': 'กรกฎาคม', 'ส.ค.': 'สิงหาคม', 'ก.ย.': 'กันยายน', 'ต.ค.': 'ตุลาคม', 'พ.ย.': 'พฤศจิกายน', 'ธ.ค.': 'ธันวาคม' };
+      Object.entries(MONTHS).forEach(([k, v]) => { t = t.split(k).join(v + ' '); });
+      return t
+        .replace(/พ\.ศ\./g, 'พุทธศักราช ').replace(/ค\.ศ\./g, 'คริสต์ศักราช ')
+        .replace(/(^|[\s(])จ\.(?=\s?[ก-๏])/g, '$1จังหวัด').replace(/(^|[\s(])อ\.(?=\s?[ก-๏])/g, '$1อำเภอ')
+        .replace(/(^|[\s(])ต\.(?=\s?[ก-๏])/g, '$1ตำบล')
+        .replace(/ฯลฯ/g, 'และอื่น ๆ').replace(/\s*–\s*/g, ' ถึง ').replace(/(\S)\/(\S)/g, '$1 หรือ $2')
+        .replace(/[“”"()]/g, ' ');
+    },
+    ttsChunks(html, max) {
+      max = max || 220;
+      // ขึ้นบรรทัดใหม่ทุกครั้งที่จบย่อหน้า/รายการ/หัวข้อ → ใช้เป็นจุดหยุดหายใจ
+      const text = String(html || '')
+        .replace(/<\/(p|li|h\d|div)>|<br\s*\/?>/gi, '\n')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
       const out = [];
-      let cur = '';
-      words.forEach((w) => {
-        if (cur && (cur + ' ' + w).length > max) { out.push(cur); cur = w; }
-        else cur = cur ? cur + ' ' + w : w;
-        // คำเดียวที่ยาวมาก (ภาษาไทยไม่เว้นวรรค) ตัดตามความยาว
-        while (cur.length > max) { out.push(cur.slice(0, max)); cur = cur.slice(max); }
+      let lastShort = false;
+      this.ttsNormalize(text).split(/\n|\s[—·•]\s|\s\.\s/).forEach((line) => {
+        line = line.replace(/\s+/g, ' ').trim();
+        if (!line) return;
+        // รายการสั้น ๆ ต่อกัน (เช่น พระ / นาง / ยักษ์ / ลิง) รวมอ่านในประโยคเดียว ไม่ให้หยุดทีละคำ
+        if (line.length < 30 && lastShort && out.length && out[out.length - 1].length + line.length < max) {
+          out[out.length - 1] += ' ' + line; return;
+        }
+        lastShort = line.length < 30;
+        if (line.length <= max) { out.push(line); return; }
+        // ประโยคยาว: แบ่งตรงช่องว่าง (ภาษาไทยเว้นวรรคระหว่างวลี) ให้แต่ละท่อนยาวใกล้เคียงกัน
+        const parts = Math.ceil(line.length / max);
+        const target = line.length / parts;
+        let cur = '';
+        line.split(' ').forEach((w) => {
+          if (cur && cur.length + w.length + 1 > target) { out.push(cur); cur = w; }
+          else cur = cur ? cur + ' ' + w : w;
+        });
+        if (cur) out.push(cur);
       });
-      if (cur) out.push(cur);
       return out;
     },
     speak(text, onEnd) {
@@ -437,7 +474,9 @@
       ttsBtn.onclick = () => {
         if (App.speaking) { App.stopSpeak(); ttsBtn.textContent = 'ฟังเสียงอ่าน'; return; }
         ttsBtn.textContent = 'หยุดอ่าน';
-        App.speak(it.title + ' . ' + (it.sub || '') + ' . ' + strip(it.body), () => { ttsBtn.textContent = 'ฟังเสียงอ่าน'; });
+        App.speak(`${it.title}
+${it.sub || ''}
+${it.body || ''}`, () => { ttsBtn.textContent = 'ฟังเสียงอ่าน'; });
       };
       $('.share-btn', w).onclick = async () => {
         const url = location.href.split('#')[0] + `#/${m.id}/${encodeURIComponent(it.id)}`;
